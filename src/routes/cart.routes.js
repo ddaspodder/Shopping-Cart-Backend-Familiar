@@ -8,8 +8,6 @@ const {
   clearCartController,
 } = require("../controller/cart.controller");
 
-const { route } = require("./order.routes");
-
 routes.get("/", getCartController);
 routes.post("/add", addToCartController);
 routes.post("/remove", removeFromCartController);

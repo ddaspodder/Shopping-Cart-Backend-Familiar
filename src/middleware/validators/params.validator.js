@@ -1,4 +1,4 @@
-const AppError = require("../../lib/appError");
+const AppError = require("../../utils/appError");
 
 const paramsValidator = (pathNames) => {
   return (req, res, next) => {

@@ -1,3 +1,5 @@
+const AppError = require("../utils/appError");
+
 const createProductValidator = (req, res, next) => {
   const { name, price } = req.body;
   if (!name || typeof name !== "string")

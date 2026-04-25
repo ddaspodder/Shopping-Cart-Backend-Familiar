@@ -1,3 +1,5 @@
+const AppError = require("../utils/appError");
+
 const STATUS = {
   CREATED: "created",
   PENDING: "pending",

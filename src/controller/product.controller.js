@@ -1,4 +1,4 @@
-const asyncHandler = require("../lib/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const {
   getAllProducts,
   getProductById,
@@ -6,9 +6,9 @@ const {
   updateProduct,
 } = require("../service/product.service");
 
-const AppError = require("../lib/appError");
+const AppError = require("../utils/appError");
 
-const { success } = require("../lib/responseHandler");
+const { success } = require("../utils/responseHandler");
 
 const getAllProductsController = asyncHandler(async (req, res) => {
   const products = await getAllProducts();

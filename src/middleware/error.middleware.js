@@ -1,13 +1,15 @@
-const AppError = require("../lib/appError");
+const AppError = require("../utils/appError");
+
+const { failure } = require("../utils/responseHandler");
 
 const errorMiddleware = (err, req, res, next) => {
-  console.error(err);
+  console.error(err.stack);
 
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json({ message: err.message });
+    return failure(res, err);
   }
 
-  return res.status(500).json({ message: "something went wrong" });
+  return failure(res, "something went wrong", 500);
 };
 
 module.exports = errorMiddleware;

@@ -1,11 +1,11 @@
-const { getData, save } = require("../lib/readWriteHandler");
+const { getData, save } = require("../utils/readWriteHandler");
 const { getAllProducts } = require("./product.service");
 const { getCart, clearCart } = require("./cart.service");
-const AppError = require("../lib/appError");
+const AppError = require("../utils/appError");
 
-const ORDER_PATH = "src/lib/order.json";
+const ORDER_FILE = "order.json";
 
-const getOrders = () => getData(ORDER_PATH);
+const getOrders = () => getData(ORDER_FILE);
 
 const getOrderById = async (id) => {
   const orders = await getOrders();
@@ -52,7 +52,7 @@ const createOrder = async () => {
 
   const orders = await getOrders();
   orders.push(order);
-  await save(ORDER_PATH, orders);
+  await save(ORDER_FILE, orders);
 
   await clearCart();
 
@@ -72,7 +72,7 @@ const updateStatus = async (id, status) => {
     return o;
   });
 
-  await save(ORDER_PATH, updatedOrders);
+  await save(ORDER_FILE, updatedOrders);
 
   return order;
 };

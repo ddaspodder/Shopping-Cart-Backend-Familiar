@@ -1,15 +1,15 @@
-const AppError = require("../lib/appError");
-const { getData, save } = require("../lib/readWriteHandler");
+const AppError = require("../utils/appError");
+const { getData, save } = require("../utils/readWriteHandler");
 
-const PRODUCT_PATH = "src/lib/product.json";
+const PRODUCT_FILE = "product.json";
 
 const getAllProducts = async () => {
-  const products = await getData(PRODUCT_PATH);
+  const products = await getData(PRODUCT_FILE);
   return products;
 };
 
 const getProductById = async (id) => {
-  const products = await getData(PRODUCT_PATH);
+  const products = await getData(PRODUCT_FILE);
   const product = products.find((product) => product.id === id);
   if (!product) throw new AppError("product not found", 404);
   return product;
@@ -26,7 +26,7 @@ const addProduct = async (data) => {
 
   const products = await getAllProducts();
   products.push(newProduct);
-  await save(PRODUCT_PATH, products);
+  await save(PRODUCT_FILE, products);
 
   return newProduct;
 };
@@ -41,7 +41,7 @@ const updateProduct = async (id, data) => {
 
   product.name = name;
   product.price = price;
-  await save(PRODUCT_PATH, products);
+  await save(PRODUCT_FILE, products);
   return product;
 };
 

@@ -5,10 +5,10 @@ const {
   clearCart,
 } = require("../service/cart.service");
 
-const asyncHandler = require("../lib/asyncHandler");
-const AppError = require("../lib/appError");
+const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/appError");
 
-const { success } = require("../lib/responseHandler");
+const { success } = require("../utils/responseHandler");
 
 const getCartController = asyncHandler(async (req, res) => {
   const cart = await getCart();
@@ -31,7 +31,7 @@ const removeFromCartController = asyncHandler(async (req, res) => {
 
 const clearCartController = asyncHandler(async (req, res) => {
   await clearCart();
-  success(res, {}, 204);
+  success(res, {});
 });
 
 module.exports = {
