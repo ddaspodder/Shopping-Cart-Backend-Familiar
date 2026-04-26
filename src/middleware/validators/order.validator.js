@@ -1,11 +1,6 @@
-const AppError = require("../utils/appError");
+const AppError = require("../../utils/appError");
 
-const STATUS = {
-  CREATED: "created",
-  PENDING: "pending",
-  SHIPPED: "shipped",
-  DELIVERED: "delivered",
-};
+const { STATUS } = require("../../constants/order.constants");
 
 const updateStatusValidator = (req, res, next) => {
   const { status } = req.body;

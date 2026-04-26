@@ -1,16 +1,17 @@
 const express = require("express");
 const routes = express.Router();
+const bodyValidator = require("../middleware/validators/body.validator");
 
 const {
   getCartController,
   addToCartController,
   removeFromCartController,
   clearCartController,
-} = require("../controller/cart.controller");
+} = require("../controllers/cart.controller");
 
 routes.get("/", getCartController);
-routes.post("/add", addToCartController);
-routes.post("/remove", removeFromCartController);
+routes.post("/add", bodyValidator, addToCartController);
+routes.post("/remove", bodyValidator, removeFromCartController);
 routes.post("/clear", clearCartController);
 
 module.exports = routes;
