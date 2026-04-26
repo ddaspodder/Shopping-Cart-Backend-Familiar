@@ -3,24 +3,25 @@ const { getCart, clearCart } = require("./cart.service");
 const Order = require("../models/order.model");
 const AppError = require("../utils/appError");
 
-const getOrders = () => Order.find();
+const getOrders = (userId) => Order.find({ userId });
 
-const getOrderById = async (id) => {
-  const order = await Order.findById(id);
+const getOrderById = async (userId, id) => {
+  const order = await Order.findOne({ _id: id, userId });
   if (!order) throw new AppError("order doesnot exist", 404);
   return order;
 };
 
-const createOrder = async () => {
-  const cart = await getCart();
+const createOrder = async (userId) => {
+  const cart = await getCart(userId);
   if (!cart || cart.length == 0) throw new AppError("cart is empty", 400);
 
   const orderItems = await Promise.all(
     cart.map(async (cartItem) => {
       const product = await getProductById(cartItem.productId);
       if (!product) throw new AppError("product doesn't exist", 404);
+
       return {
-        productId: product.id,
+        productId: product.id, //mongoose allows product.id
         quantity: cartItem.quantity,
         price: product.price,
         itemTotal: product.price * cartItem.quantity,
@@ -28,32 +29,31 @@ const createOrder = async () => {
     }),
   );
 
-  const currentDate = new Date().toISOString();
-
   const order = {
+    userId,
     items: orderItems,
     totalAmount: orderItems.reduce(
       (total, items) => total + items.itemTotal,
       0,
     ),
     status: "created",
-    orderDate: currentDate,
-    updatedAt: currentDate,
   };
 
   const createdOrder = await Order.create(order);
 
-  await clearCart();
+  await clearCart(userId);
 
   return createdOrder;
 };
 
-const updateStatus = async (id, status) => {
-  const updatedOrder = await Order.findByIdAndUpdate(
-    id,
+const updateStatus = async (userId, id, status) => {
+  const updatedOrder = await Order.findOneAndUpdate(
+    { _id: id, userId },
     { status },
-    { new: true },
+    { returnDocument: "after" },
   );
+
+  if (!updatedOrder) throw new AppError("order doesnot exist", 404);
 
   return updatedOrder;
 };

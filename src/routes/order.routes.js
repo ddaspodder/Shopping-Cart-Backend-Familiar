@@ -16,7 +16,7 @@ const {
 const bodyValidator = require("../middleware/validators/body.validator");
 const routes = express.Router();
 
-routes.post("/", bodyValidator, createOrderController);
+routes.post("/", createOrderController);
 routes.get("/", getOrderController);
 routes.get("/:id", paramsValidator(["id"]), getOrderByIdController);
 routes.patch(

@@ -1,49 +1,46 @@
 const AppError = require("../utils/appError");
 const Cart = require("../models/cart.model");
-const { getProductById } = require("./product.service");
 
-const getCart = async () => {
-  return await Cart.find();
+const getCart = async (userId) => {
+  return await Cart.find({ userId });
 };
 
-const addToCart = async (productId) => {
-  const cartItem = await Cart.findOne({ productId });
+const addToCart = async (userId, productId) => {
+  const cartItem = await Cart.findOne({ userId, productId });
 
   let newCartItem = {};
   if (!cartItem) {
-    newCartItem = await Cart.create({ productId, quantity: 1 });
+    newCartItem = await Cart.create({ userId, productId, quantity: 1 });
   } else {
     newCartItem = await Cart.findOneAndUpdate(
-      { productId },
-      { quantity: cartItem.quantity + 1 },
-      { new: true },
+      { userId, productId },
+      { $inc: { quantity: 1 } },
+      { returnDocument: "after" },
     );
   }
 
   return newCartItem;
 };
 
-const removeFromCart = async (productId) => {
-  const product = await getProductById(productId);
-  if (!product) throw new AppError("product doesnt exist", 404);
-
-  const cartItem = await Cart.findOne({ productId });
+const removeFromCart = async (userId, productId) => {
+  const cartItem = await Cart.findOne({ userId, productId });
   if (!cartItem) throw new AppError("Item no longer exist", 404);
 
   let newCartItem = {};
-  if (cartItem.quantity === 1) await Cart.findOneAndDelete({ productId });
+  if (cartItem.quantity === 1)
+    await Cart.findOneAndDelete({ userId, productId });
   else
     newCartItem = await Cart.findOneAndUpdate(
-      { productId },
-      { quantity: cartItem.quantity - 1 },
-      { new: true },
+      { userId, productId },
+      { $dec: { quantity: 1 } },
+      { returnDocument: "after" },
     );
 
   return newCartItem;
 };
 
-const clearCart = async () => {
-  return await Cart.deleteMany({});
+const clearCart = async (userId) => {
+  return await Cart.deleteMany({ userId });
 };
 
 module.exports = { getCart, addToCart, removeFromCart, clearCart };

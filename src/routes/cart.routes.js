@@ -12,6 +12,6 @@ const {
 routes.get("/", getCartController);
 routes.post("/add", bodyValidator, addToCartController);
 routes.post("/remove", bodyValidator, removeFromCartController);
-routes.post("/clear", bodyValidator, clearCartController);
+routes.post("/clear", clearCartController);
 
 module.exports = routes;
