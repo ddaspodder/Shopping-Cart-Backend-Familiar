@@ -1,8 +1,13 @@
 const express = require("express");
 
+require("dotenv").config();
+
 const http = require("http");
 
 const app = express();
+
+const connectDB = require("./config/db");
+connectDB();
 
 const productRoutes = require("./routes/product.routes");
 const cartRoutes = require("./routes/cart.routes");

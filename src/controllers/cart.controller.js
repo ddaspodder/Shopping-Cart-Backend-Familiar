@@ -3,7 +3,7 @@ const {
   addToCart,
   removeFromCart,
   clearCart,
-} = require("../service/cart.service");
+} = require("../services/cart.service");
 
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");

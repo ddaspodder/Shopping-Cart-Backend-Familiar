@@ -1,4 +1,4 @@
-const AppError = require("../utils/appError");
+const AppError = require("../../utils/appError");
 
 const createProductValidator = (req, res, next) => {
   const { name, price } = req.body;
@@ -12,7 +12,7 @@ const createProductValidator = (req, res, next) => {
 
 const updateProductValidator = (req, res, next) => {
   const { name, price } = req.body;
-  if (!name || !price)
+  if (!name && !price)
     return next(new AppError("name or price is missing", 400));
   if (name && typeof name !== "string")
     return next(new AppError("invalid name", 400));

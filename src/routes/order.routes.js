@@ -3,7 +3,7 @@ const {
   createOrderController,
   getOrderByIdController,
   updateStatusController,
-} = require("../controller/order.controller");
+} = require("../controllers/order.controller");
 
 const {
   updateStatusValidator,
@@ -13,14 +13,16 @@ const express = require("express");
 const {
   paramsValidator,
 } = require("../middleware/validators/params.validator");
+const bodyValidator = require("../middleware/validators/body.validator");
 const routes = express.Router();
 
-routes.post("/", createOrderController);
+routes.post("/", bodyValidator, createOrderController);
 routes.get("/", getOrderController);
 routes.get("/:id", paramsValidator(["id"]), getOrderByIdController);
 routes.patch(
   "/:id/status",
   paramsValidator(["id"]),
+  bodyValidator,
   updateStatusValidator,
   updateStatusController,
 );

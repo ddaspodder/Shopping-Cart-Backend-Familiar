@@ -4,7 +4,7 @@ const {
   getProductById,
   addProduct,
   updateProduct,
-} = require("../service/product.service");
+} = require("../services/product.service");
 
 const AppError = require("../utils/appError");
 

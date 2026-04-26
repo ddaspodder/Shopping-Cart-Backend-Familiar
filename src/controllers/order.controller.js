@@ -3,7 +3,7 @@ const {
   createOrder,
   getOrderById,
   updateStatus,
-} = require("../service/order.service");
+} = require("../services/order.service");
 const asyncHandler = require("../utils/asyncHandler");
 
 const AppError = require("../utils/appError");
@@ -11,8 +11,8 @@ const AppError = require("../utils/appError");
 const { success } = require("../utils/responseHandler");
 
 const createOrderController = asyncHandler(async (req, res) => {
-  const { orderId } = await createOrder();
-  success(res, { orderId }, 201);
+  const order = await createOrder();
+  success(res, order, 201);
 });
 
 const getOrderController = asyncHandler(async (req, res) => {
