@@ -6,31 +6,36 @@ const {
   updateProduct,
 } = require("../services/product.service");
 
+const {
+  productFormatter,
+  productListFormatter,
+} = require("../utils/formatters/product.formatter");
+
 const AppError = require("../utils/appError");
 
 const { success } = require("../utils/responseHandler");
 
 const getAllProductsController = asyncHandler(async (req, res) => {
   const products = await getAllProducts();
-  success(res, products);
+  success(res, productListFormatter(products));
 });
 
 const getProductController = asyncHandler(async (req, res) => {
   const id = req.params.id;
   if (!id) throw new AppError("bad id", 400);
   const product = await getProductById(id);
-  success(res, product);
+  success(res, productFormatter(product));
 });
 
 const addProductController = asyncHandler(async (req, res) => {
   const product = await addProduct(req.body);
-  success(res, product, 201);
+  success(res, productFormatter(product), 201);
 });
 
 const updateProductController = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const product = await updateProduct(id, req.body);
-  success(res, product);
+  success(res, productFormatter(product));
 });
 
 module.exports = {

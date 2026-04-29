@@ -9,6 +9,10 @@ const {
   clearCartController,
 } = require("../controllers/cart.controller");
 
+const authGuard = require("../middleware/auth.middleware");
+
+routes.use(authGuard);
+
 routes.get("/", getCartController);
 routes.post("/add", bodyValidator, addToCartController);
 routes.post("/remove", bodyValidator, removeFromCartController);

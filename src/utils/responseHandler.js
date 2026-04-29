@@ -5,7 +5,7 @@ const success = (res, data, code = 200) => {
   });
 };
 
-const failure = (res, err, code = 500) => {
+const failure = (res, err, code) => {
   res.status(code || err.statusCode || 500).json({
     status: "failure",
     message: err.message || "internal server error",

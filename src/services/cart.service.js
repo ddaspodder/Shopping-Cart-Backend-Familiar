@@ -32,7 +32,7 @@ const removeFromCart = async (userId, productId) => {
   else
     newCartItem = await Cart.findOneAndUpdate(
       { userId, productId },
-      { $dec: { quantity: 1 } },
+      { $inc: { quantity: -1 } },
       { returnDocument: "after" },
     );
 
