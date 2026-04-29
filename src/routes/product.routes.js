@@ -24,6 +24,8 @@ router.get("/", getAllProductsController);
 
 router.get("/:id", paramsValidator(["id"]), getProductController);
 
+//have to implment admin auth guard to protect these routes
+
 router.post("/", bodyValidator, createProductValidator, addProductController);
 
 router.patch(
