@@ -9,7 +9,7 @@ const {
   clearCartController,
 } = require("../controllers/cart.controller");
 
-const authGuard = require("../middleware/auth.middleware");
+const authGuard = require("../middleware/authentication.middleware");
 
 routes.use(authGuard);
 

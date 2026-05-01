@@ -12,6 +12,12 @@ const getProductById = async (id) => {
   return product;
 };
 
+const getActiveProductById = async (id) => {
+  const product = await Product.findOne({ _id: id, isActive: true });
+  if (!product) throw new AppError("product not found", 404);
+  return product;
+};
+
 const addProduct = async (data) => {
   const { name, price } = data;
   const newProduct = await Product.create({ name, price });
@@ -27,16 +33,28 @@ const updateProduct = async (id, data) => {
   if (price) updatedData.price = price;
 
   const product = await Product.findByIdAndUpdate(id, updatedData, {
-    new: true,
+    returnDocument: "after",
   });
 
   if (!product) throw new AppError("product doesn't exist", 404);
   return product;
 };
 
+const deleteProduct = async (id) => {
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { returnDocument: "after" },
+  );
+  if (!product) throw new AppError("product doesn't exist", 404);
+  return;
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
+  getActiveProductById,
   addProduct,
   updateProduct,
+  deleteProduct,
 };

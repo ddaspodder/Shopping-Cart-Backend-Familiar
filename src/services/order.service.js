@@ -1,4 +1,4 @@
-const { getProductById } = require("./product.service");
+const { getActiveProductById } = require("./product.service");
 const { getCart, clearCart } = require("./cart.service");
 const Order = require("../models/order.model");
 const AppError = require("../utils/appError");
@@ -17,11 +17,10 @@ const createOrder = async (userId) => {
 
   const orderItems = await Promise.all(
     cart.map(async (cartItem) => {
-      const product = await getProductById(cartItem.productId);
-      if (!product) throw new AppError("product doesn't exist", 404);
+      const product = await getActiveProductById(cartItem.productId);
 
       return {
-        productId: product.id, //mongoose allows product.id
+        productId: product._id.toString(),
         quantity: cartItem.quantity,
         price: product.price,
         itemTotal: product.price * cartItem.quantity,

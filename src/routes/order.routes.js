@@ -16,7 +16,7 @@ const {
 const bodyValidator = require("../middleware/validators/body.validator");
 const routes = express.Router();
 
-const authGuard = require("../middleware/auth.middleware");
+const authGuard = require("../middleware/authentication.middleware");
 
 routes.use(authGuard);
 

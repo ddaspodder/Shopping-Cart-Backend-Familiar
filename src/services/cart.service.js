@@ -1,11 +1,34 @@
 const AppError = require("../utils/appError");
 const Cart = require("../models/cart.model");
+const { getProductById, getActiveProductById } = require("./product.service");
 
 const getCart = async (userId) => {
-  return await Cart.find({ userId });
+  const cart = await Cart.find({ userId });
+  //later check how to do this in SQL
+
+  const extendedCart = await Promise.all(
+    cart.map(async (cartItem) => {
+      const product = await getProductById(cartItem.productId);
+      return { cartItem, isActive: product.isActive };
+    }),
+  );
+
+  const inactiveProductIds = extendedCart
+    .filter((item) => item.isActive)
+    .map(({ cartItem }) => cartItem.productId);
+
+  Cart.deleteMany({ userId, productId: { $in: inactiveProductIds } });
+
+  const activeCartItems = extendedCart
+    .filter((item) => item.isActive)
+    .map(({ cartItem }) => cartItem);
+
+  return activeCartItems;
 };
 
 const addToCart = async (userId, productId) => {
+  await getActiveProductById(productId);
+
   const cartItem = await Cart.findOne({ userId, productId });
 
   let newCartItem = {};
@@ -23,6 +46,8 @@ const addToCart = async (userId, productId) => {
 };
 
 const removeFromCart = async (userId, productId) => {
+  await getActiveProductById(productId);
+
   const cartItem = await Cart.findOne({ userId, productId });
   if (!cartItem) throw new AppError("Item no longer exist", 404);
 
