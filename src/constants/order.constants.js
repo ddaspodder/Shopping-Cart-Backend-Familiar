@@ -1,8 +1,8 @@
 const STATUS = {
   CREATED: "created",
-  PENDING: "pending",
   SHIPPED: "shipped",
   DELIVERED: "delivered",
+  CANCELLED: "cancelled",
 };
 
 module.exports = {
