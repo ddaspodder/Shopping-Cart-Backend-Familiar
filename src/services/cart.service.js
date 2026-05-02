@@ -1,67 +1,90 @@
 const AppError = require("../utils/appError");
 const Cart = require("../models/cart.model");
-const { getProductById, getActiveProductById } = require("./product.service");
+const { getActiveProductById } = require("./product.service");
 
 const getCart = async (userId) => {
-  const cart = await Cart.find({ userId });
-  //later check how to do this in SQL
+  const cart = await Cart.findOne({ userId });
+  if (!cart) throw new AppError("Cart not found", 404);
 
-  const extendedCart = await Promise.all(
-    cart.map(async (cartItem) => {
-      const product = await getProductById(cartItem.productId);
-      return { cartItem, isActive: product.isActive };
-    }),
-  );
+  const activeItems = (
+    await Promise.all(
+      cart.items.map(async (item) => {
+        try {
+          await getActiveProductById(item.productId);
+          return item;
+        } catch (err) {
+          if (err instanceof AppError && err.statusCode === 404) {
+            return null;
+          }
+        }
+      }),
+    )
+  ).filter((item) => Boolean(item));
 
-  const inactiveProductIds = extendedCart
-    .filter((item) => item.isActive)
-    .map(({ cartItem }) => cartItem.productId);
-
-  Cart.deleteMany({ userId, productId: { $in: inactiveProductIds } });
-
-  const activeCartItems = extendedCart
-    .filter((item) => item.isActive)
-    .map(({ cartItem }) => cartItem);
-
-  return activeCartItems;
-};
-
-const addToCart = async (userId, productId) => {
-  await getActiveProductById(productId);
-
-  const cartItem = await Cart.findOne({ userId, productId });
-
-  let newCartItem = {};
-  if (!cartItem) {
-    newCartItem = await Cart.create({ userId, productId, quantity: 1 });
-  } else {
-    newCartItem = await Cart.findOneAndUpdate(
-      { userId, productId },
-      { $inc: { quantity: 1 } },
-      { returnDocument: "after" },
-    );
+  if (activeItems.length === 0) {
+    await Cart.deleteOne({ userId });
+    throw new AppError("Cart not found", 404);
   }
 
-  return newCartItem;
+  cart.items = activeItems;
+
+  await cart.save();
+
+  return cart;
 };
 
-const removeFromCart = async (userId, productId) => {
+const addToCart = async (userId, productId, quantity) => {
   await getActiveProductById(productId);
 
-  const cartItem = await Cart.findOne({ userId, productId });
+  const cart = await Cart.findOne({ userId });
+
+  if (!cart) {
+    const newCart = new Cart({
+      userId,
+      items: [{ productId, quantity }],
+    });
+    await newCart.save();
+    return newCart;
+  }
+
+  const cartItem = cart.items.find(
+    (cartItem) => cartItem.productId.toString() === productId,
+  );
+
+  if (!cartItem) {
+    cart.items.push({ productId, quantity });
+  } else {
+    cartItem.quantity += quantity;
+  }
+
+  await cart.save();
+  return cart;
+};
+
+const removeFromCart = async (userId, productId, quantity) => {
+  await getActiveProductById(productId);
+
+  const cart = await Cart.findOne({ userId });
+  if (!cart) throw new AppError("Item no longer exist", 404);
+
+  const cartItem = await cart.items.find(
+    (cartItem) => cartItem.productId.toString() === productId,
+  );
+
   if (!cartItem) throw new AppError("Item no longer exist", 404);
 
-  let newCartItem = {};
-  if (cartItem.quantity === 1)
-    await Cart.findOneAndDelete({ userId, productId });
-  else
-    newCartItem = await Cart.findOneAndUpdate(
-      { userId, productId },
-      { $inc: { quantity: -1 } },
-      { returnDocument: "after" },
+  if (cartItem.quantity <= quantity) {
+    const cartItemIndex = cart.items.findIndex(
+      (item) => item.productId === productId,
     );
+    cart.items.splice(cartItemIndex, 1);
+  } else {
+    cartItem.quantity -= quantity;
+  }
 
-  return newCartItem;
+  await cart.save();
+
+  return cart;
 };
 
 const clearCart = async (userId) => {
