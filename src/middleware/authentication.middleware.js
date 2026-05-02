@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch {
-    next(new AppError("Invalid token", 401));
+    next(new AppError("Unauthorized", 401));
   }
 };
 

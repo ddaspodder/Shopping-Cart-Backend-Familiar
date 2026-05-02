@@ -3,7 +3,11 @@ const { STATUS } = require("../constants/order.constants");
 
 const orderSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     items: [
       {
         productId: { type: String, required: true },

@@ -2,7 +2,7 @@ const AppError = require("../utils/appError");
 const Product = require("../models/product.model");
 
 const getAllProducts = async () => {
-  const products = await Product.find();
+  const products = await Product.find({ isActive: true });
   return products;
 };
 
