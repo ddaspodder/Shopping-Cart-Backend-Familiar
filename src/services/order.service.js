@@ -1,5 +1,5 @@
-const { getActiveProductById } = require("./product.service");
-const { getCart, clearCart } = require("./cart.service");
+const { default: mongoose } = require("mongoose");
+const Cart = require("../models/cart.model");
 const Order = require("../models/order.model");
 const AppError = require("../utils/appError");
 
@@ -12,37 +12,54 @@ const getOrderById = async (userId, id) => {
 };
 
 const createOrder = async (userId) => {
-  const cart = await getCart(userId);
-  if (!cart || cart.length == 0) throw new AppError("cart is empty", 400);
+  const session = await mongoose.startSession();
 
-  const orderItems = await Promise.all(
-    cart.map(async (cartItem) => {
-      const product = await getActiveProductById(cartItem.productId);
+  try {
+    session.startTransaction();
 
+    const cart = await Cart.findOne({ userId })
+      .session(session)
+      .populate("items.productId");
+
+    if (!cart || cart.items.length == 0)
+      throw new AppError("shopping cart is empty", 400);
+
+    const orderItems = cart.items.map((cartItem) => {
+      const product = cartItem.productId;
+      if (!product || !product.isActive)
+        throw new AppError("some products in the cart are not available", 409);
       return {
-        productId: product._id.toString(),
+        productId: product._id,
         quantity: cartItem.quantity,
         price: product.price,
         itemTotal: product.price * cartItem.quantity,
       };
-    }),
-  );
+    });
 
-  const order = {
-    userId,
-    items: orderItems,
-    totalAmount: orderItems.reduce(
-      (total, items) => total + items.itemTotal,
-      0,
-    ),
-    status: "created",
-  };
+    const order = new Order({
+      userId,
+      items: orderItems,
+      totalAmount: orderItems.reduce(
+        (total, items) => total + items.itemTotal,
+        0,
+      ),
+      status: "created",
+    });
 
-  const createdOrder = await Order.create(order);
+    await order.save({ session });
 
-  await clearCart(userId);
+    cart.items = [];
+    await cart.save({ session });
 
-  return createdOrder;
+    await session.commitTransaction();
+
+    return order;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
 };
 
 const updateStatus = async (userId, id, status) => {

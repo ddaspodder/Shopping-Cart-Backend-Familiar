@@ -4,7 +4,8 @@ const { getActiveProductById } = require("./product.service");
 
 const getCart = async (userId) => {
   const cart = await Cart.findOne({ userId });
-  if (!cart) throw new AppError("Cart not found", 404);
+  if (!cart || cart.items.length === 0)
+    throw new AppError("Cart not found", 404);
 
   const activeItems = (
     await Promise.all(
@@ -88,7 +89,11 @@ const removeFromCart = async (userId, productId, quantity) => {
 };
 
 const clearCart = async (userId) => {
-  return await Cart.deleteMany({ userId });
+  const cart = await Cart.findOne({ userId });
+  if (!cart) throw new AppError("Cart not found", 404);
+  cart.items = [];
+  await cart.save();
+  return cart;
 };
 
 module.exports = { getCart, addToCart, removeFromCart, clearCart };
