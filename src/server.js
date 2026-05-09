@@ -4,7 +4,29 @@ require("dotenv").config();
 
 const http = require("http");
 
+const helmet = require("helmet");
+
+const cors = require("cors");
+
+const rateLimit = require("express-rate-limit");
+
 const app = express();
+
+app.use(helmet());
+
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+  }),
+);
+
+app.use(
+  cors({
+    origin: [process.env.CLIENT_URL],
+    credentials: true,
+  }),
+);
 
 const connectDB = require("./config/db");
 connectDB();
@@ -18,6 +40,14 @@ const errorMiddleware = require("./middleware/error.middleware");
 const AppError = require("./utils/appError");
 
 app.use(express.json());
+
+app.use(
+  "/api/auth",
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // limit each IP to 20 requests per windowMs for auth routes
+  }),
+);
 
 app.use("/api/auth", authRoutes);
 
@@ -39,6 +69,6 @@ app.use(errorMiddleware);
 
 const server = http.createServer(app);
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
+server.listen(process.env.PORT || 8000, () => {
+  console.log(`Server running on port ${process.env.PORT || 8000}`);
 });
